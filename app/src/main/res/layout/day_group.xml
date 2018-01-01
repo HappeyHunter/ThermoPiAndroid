@@ -8,6 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-        android:textSize="18sp" />
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:textSize="20sp" />
 
 </LinearLayout>

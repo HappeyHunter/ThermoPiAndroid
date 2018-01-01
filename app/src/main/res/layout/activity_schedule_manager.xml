@@ -11,15 +11,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/headingView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/scheduleHeading"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            app:layout_constraintBottom_toTopOf="@+id/monthSpinner" />
-
         <Button
             android:id="@+id/submitScheduleButton"
             android:layout_width="match_parent"

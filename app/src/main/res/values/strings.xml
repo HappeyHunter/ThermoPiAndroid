@@ -11,14 +11,23 @@
     <string name="formattedTemperature">%.0f°C</string>
     <string name="formattedTime">%02d:%02d</string>
     <string name="confirmButton">Confirm</string>
-    <string name="targetTemperatureDescriptionText">Target Temperature</string>
-    <string name="title_activity_holiday_manager">HolidayManager</string>
-    <string name="title_activity_settings">Settings</string>
     <string name="scheduleHeading">Schedule</string>
     <string name="failedToRetrieveData">Failed to retrieve data from to server</string>
     <string name="failedToUpdateData">Failed to update</string>
     <string name="submitSchedule">Submit Schedule</string>
     <string name="scheduleUpdateSuccess">Schedule updated successfully</string>
+    <string name="targetTempUpdateSuccess">Target temperature updated successfully</string>
+    <string name="boostDisabled">Boost disabled</string>
+    <string name="boostEnabled">Boost enabled until %s</string>
+
+
+    <string name="title_activity_schedule_manager">Schedule</string>
+    <string name="title_activity_target_temperature_control">Target Temperature</string>
+    <string name="title_activity_holiday_manager">Holidays</string>
+    <string name="title_activity_settings">Settings</string>
+
+
+
 
 
     <string-array name="months_array">

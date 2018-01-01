@@ -55,6 +55,13 @@ public class TargetTemperatureControl extends AppCompatActivity {
         });
     }
 
+    private void updateSuccessfulToast() {
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.targetTempUpdateSuccess), duration);
+        toast.show();
+    }
+
     private void failedToGetData() {
         int duration = Toast.LENGTH_SHORT;
 
@@ -81,6 +88,7 @@ public class TargetTemperatureControl extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.isSuccessful()) {
+                    updateSuccessfulToast();
                     finish();
                 } else {
                     onFailure(call, null);

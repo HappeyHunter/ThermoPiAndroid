@@ -17,6 +17,9 @@ import com.happeyhunter.thermopi.data.thermopi.TargetTemperatureData;
 import com.happeyhunter.thermopi.rest.RESTUtils;
 import com.happeyhunter.thermopi.utils.FormatHelper;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -166,8 +169,10 @@ public class MainMenu extends AppCompatActivity {
 
                     if (response.body().getEnabled()) {
                         boostStatusView.setImageResource(R.mipmap.boost_on);
+                        boostEnabledToast(response.body().getEndDate());
                     } else {
                         boostStatusView.setImageResource(R.mipmap.boost_off);
+                        boostDisabledToast();
                     }
 
                     // Notification for 1 hour or maybe until X or disabled
@@ -181,8 +186,33 @@ public class MainMenu extends AppCompatActivity {
                 ToggleButton boostButton = findViewById(R.id.boostButton);
                 boostButton.toggle();
                 // maybe a message or something
+                boostUpdateFailedToast();
             }
         }, update);
+    }
+
+    private void boostUpdateFailedToast() {
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.failedToUpdateData), duration);
+        toast.show();
+    }
+
+    private void boostDisabledToast() {
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.boostDisabled), duration);
+        toast.show();
+    }
+
+    private void boostEnabledToast(Long endDate) {
+        int duration = Toast.LENGTH_SHORT;
+
+        Date boostEndData = new Date(endDate*1000);
+        String timeString = DateFormat.getTimeInstance(DateFormat.SHORT, getResources().getConfiguration().locale).format(boostEndData);
+
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.boostEnabled, timeString), duration);
+        toast.show();
     }
 
     private void goToScheduleManager() {

@@ -7,9 +7,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_thermopi"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_thermopi_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Design">
         <activity android:name=".MainMenu">
@@ -19,8 +19,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".TargetTemperatureControl" />
-        <activity android:name=".ScheduleManager" />
+        <activity
+            android:name=".TargetTemperatureControl"
+            android:label="@string/title_activity_target_temperature_control" />
+        <activity
+            android:name=".ScheduleManager"
+            android:label="@string/title_activity_schedule_manager" />
         <activity
             android:name=".HolidayManager"
             android:label="@string/title_activity_holiday_manager" />
