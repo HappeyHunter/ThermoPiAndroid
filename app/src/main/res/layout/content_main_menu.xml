@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/activeImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/currentTempView"
+        app:layout_constraintEnd_toStartOf="@+id/boostImage"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@mipmap/flame_off" />
+
+    <ImageView
+        android:id="@+id/boostImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/targetTempView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/activeImage"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@mipmap/boost_off" />
+
+    <Button
+        android:id="@+id/scheduleButton"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/scheduleButton"
+        app:layout_constraintBottom_toTopOf="@+id/tempButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/currentTempView" />
+
+    <Button
+        android:id="@+id/tempButton"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/temperatureButton"
+        app:layout_constraintBottom_toTopOf="@+id/boostButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scheduleButton" />
+
+    <ToggleButton
+        android:id="@+id/boostButton"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:textOff="@string/enableBoost"
+        android:textOn="@string/disableBoost"
+        android:onClick="updateBoostSetting"
+        app:layout_constraintBottom_toTopOf="@+id/holidayButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tempButton" />
+
+    <Button
+        android:id="@+id/holidayButton"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/holidayButton"
+        app:layout_constraintBottom_toTopOf="@+id/settingsButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/boostButton" />
+
+    <Button
+        android:id="@+id/settingsButton"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/settingsButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/holidayButton" />
+
+    <TextView
+        android:id="@+id/currentTempView"
+        android:layout_width="85dp"
+        android:layout_height="45dp"
+        android:text="@string/currentTemperatureText"
+        android:textAlignment="center"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toTopOf="@+id/scheduleButton"
+        app:layout_constraintEnd_toStartOf="@+id/targetTempView"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activeImage" />
+
+    <TextView
+        android:id="@+id/targetTempView"
+        android:layout_width="85dp"
+        android:layout_height="45dp"
+        android:text="@string/targetTemperatureText"
+        android:textAlignment="center"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toTopOf="@+id/scheduleButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/currentTempView"
+        app:layout_constraintTop_toBottomOf="@+id/boostImage" />
+
+</android.support.constraint.ConstraintLayout>
