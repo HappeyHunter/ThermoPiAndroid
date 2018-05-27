@@ -1,4 +1,4 @@
-package com.happeyhunter.thermopi;
+package com.happeyhunter.thermopi.schedule;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -9,8 +9,8 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import com.happeyhunter.thermopi.R;
 import com.happeyhunter.thermopi.data.thermopi.QuarterData;
-import com.happeyhunter.thermopi.utils.FormatHelper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +24,6 @@ public class ScheduleExpandableListViewAdapter extends BaseExpandableListAdapter
     private Context context;
     private List<String> expandableListDays;
     private HashMap<String, List<QuarterData>> expandableListQuarters;
-    //private HashMap<Integer, List<QuarterData>> expandableListQuarters;
 
     public ScheduleExpandableListViewAdapter(Context aContext, List<String> days, HashMap<String, List<QuarterData>> quarters) {
         context = aContext;
@@ -92,7 +91,7 @@ public class ScheduleExpandableListViewAdapter extends BaseExpandableListAdapter
             convertView = layoutInflater.inflate(R.layout.day_quarter, null);
         }
         TextView expandedListTextView = convertView.findViewById(R.id.dayQuarter);
-        expandedListTextView.setText(FormatHelper.formatTime(context, quarterData.getHour(), quarterData.getQuarter()*15));
+        expandedListTextView.setText(context.getString(R.string.formattedTime, quarterData.getHour(), quarterData.getQuarter() * 15));
         if(quarterData.getEnabled()) {
             expandedListTextView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorActive));
         } else {

@@ -8,7 +8,6 @@ public class CurrentTemperatureData {
 
     private Double temperature;
     private Double humidity;
-    private Long readingDate;
 
     public Double getTemperature() {
         return temperature;
@@ -24,13 +23,4 @@ public class CurrentTemperatureData {
 
     public void setHumidity(Double humidity) {
         this.humidity = humidity;
-    }
-
-    public Long getReadingDate() {
-        return readingDate;
-    }
-
-    public void setReadingDate(Long readingDate) {
-        this.readingDate = readingDate;
-    }
-}
+    }}

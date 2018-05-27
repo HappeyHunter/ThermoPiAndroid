@@ -1,4 +1,4 @@
-package com.happeyhunter.thermopi;
+package com.happeyhunter.thermopi.schedule;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -55,15 +55,5 @@ public class ScheduleExpandableListView extends ExpandableListView {
         for (int i = 0; i < groupsCount; i++) {
             collapseGroup(i);
         }
-    }
-
-    @Override
-    public boolean expandGroup(int groupPos, boolean animate) {
-        return active && super.expandGroup(groupPos);
-    }
-
-    @Override
-    public boolean expandGroup(int groupPos) {
-        return expandGroup(groupPos, false);
     }
 }

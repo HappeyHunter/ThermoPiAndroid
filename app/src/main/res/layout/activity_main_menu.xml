@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/Theme.AppCompat"
-    tools:context="com.happeyhunter.thermopi.MainMenu">
+    tools:context="com.happeyhunter.thermopi.activities.MainMenu">
 
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"

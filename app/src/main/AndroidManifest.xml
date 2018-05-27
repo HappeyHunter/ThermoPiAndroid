@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_thermopi_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Design">
-        <activity android:name=".MainMenu">
+        <activity android:name=".activities.MainMenu">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,16 +20,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".TargetTemperatureControl"
+            android:name=".activities.TargetTemperatureControl"
             android:label="@string/title_activity_target_temperature_control" />
         <activity
-            android:name=".ScheduleManager"
+            android:name=".activities.ScheduleManager"
             android:label="@string/title_activity_schedule_manager" />
         <activity
-            android:name=".HolidayManager"
+            android:name=".activities.HolidayManager"
             android:label="@string/title_activity_holiday_manager" />
+        <activity android:name=".activities.AddHoliday" />
         <activity
-            android:name=".Settings"
+            android:name=".activities.Settings"
             android:label="@string/title_activity_settings" />
     </application>
 

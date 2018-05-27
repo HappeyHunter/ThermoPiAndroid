@@ -1,16 +1,20 @@
-package com.happeyhunter.thermopi;
+package com.happeyhunter.thermopi.activities;
 
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.happeyhunter.thermopi.R;
+import com.happeyhunter.thermopi.schedule.ScheduleExpandableListView;
+import com.happeyhunter.thermopi.schedule.ScheduleExpandableListViewAdapter;
 import com.happeyhunter.thermopi.data.thermopi.DayScheduleData;
 import com.happeyhunter.thermopi.data.thermopi.HourScheduleData;
 import com.happeyhunter.thermopi.data.thermopi.QuarterData;
@@ -18,6 +22,10 @@ import com.happeyhunter.thermopi.data.thermopi.QuarterScheduleData;
 import com.happeyhunter.thermopi.data.thermopi.WeekScheduleData;
 import com.happeyhunter.thermopi.rest.RESTUtils;
 
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
+
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -28,10 +36,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ScheduleManager extends AppCompatActivity {
+public class ScheduleManager extends ThermoPiActivity {
 
     private List<String> days;
-    private HashMap<String, List<QuarterData>> quarters = new HashMap<String, List<QuarterData>>();
+    private HashMap<String, List<QuarterData>> quarters = new HashMap<>();
     private WeekScheduleData weekScheduleData;
     private List<Boolean> daysUpdateTracker;
 
@@ -41,20 +49,18 @@ public class ScheduleManager extends AppCompatActivity {
         setContentView(R.layout.activity_schedule_manager);
 
         initialise();
-
-        populateList(getCurrentMonth());
     }
 
     private void initialise() {
 
         Spinner monthSpinner = findViewById(R.id.monthSpinner);
-        monthSpinner.setSelection(getCurrentMonth());
+        monthSpinner.setSelection(getCurrentMonth()-1);
 
         monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                populateList(position);
+                populateList(position+1);
             }
 
             @Override
@@ -63,7 +69,7 @@ public class ScheduleManager extends AppCompatActivity {
             }
         });
 
-        if(days == null) {
+        if (days == null) {
             days = new ArrayList<>();
 
             days.add("Monday");
@@ -76,7 +82,7 @@ public class ScheduleManager extends AppCompatActivity {
 
             daysUpdateTracker = new ArrayList<>();
 
-            for(int i = 0; i < days.size(); i++) {
+            for (int i = 0; i < days.size(); i++) {
                 daysUpdateTracker.add(Boolean.FALSE);
             }
         }
@@ -115,8 +121,8 @@ public class ScheduleManager extends AppCompatActivity {
     private int updateDaysCount() {
         int updateDays = 0;
 
-        for(Boolean updated : daysUpdateTracker) {
-            if(updated) {
+        for (Boolean updated : daysUpdateTracker) {
+            if (updated) {
                 updateDays++;
             }
         }
@@ -129,6 +135,8 @@ public class ScheduleManager extends AppCompatActivity {
 
         Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.scheduleUpdateSuccess), duration);
         toast.show();
+
+        activateExpandableView();
     }
 
     private void updateFailedToast() {
@@ -136,56 +144,64 @@ public class ScheduleManager extends AppCompatActivity {
 
         Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.failedToUpdateData), duration);
         toast.show();
+
+        activateExpandableView();
     }
 
     private void fullWeekUpdate() {
         Spinner monthSpinner = findViewById(R.id.monthSpinner);
-        int month = monthSpinner.getSelectedItemPosition();
+        int month = monthSpinner.getSelectedItemPosition()+1;
 
-        RESTUtils.updateWeeklySchedule(new Callback<ResponseBody>() {
-                                           @Override
-                                           public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                               if(response.isSuccessful()) {
-                                                   updateSuccessfulToast();
-                                               } else {
-                                                   onFailure(call, null);
-                                               }
-                                           }
+        RESTUtils.updateWeeklySchedule(this,
+                new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            updateSuccessfulToast();
+                        } else if (response.code() == 403) {
+                            invalidToken();
+                        } else {
+                            onFailure(call, new Exception());
+                        }
+                    }
 
-                                           @Override
-                                           public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                               updateFailedToast();
-                                           }
-                                       },
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        updateFailedToast();
+                    }
+                },
                 month,
                 weekScheduleData
-                );
+        );
     }
 
     private void dailyUpdate() {
         Spinner monthSpinner = findViewById(R.id.monthSpinner);
-        int month = monthSpinner.getSelectedItemPosition();
+        int month = monthSpinner.getSelectedItemPosition()+1;
 
-        for(int i = 0; i < daysUpdateTracker.size(); i++) {
+        for (int i = 0; i < daysUpdateTracker.size(); i++) {
 
-            if(daysUpdateTracker.get(i)) {
+            if (daysUpdateTracker.get(i)) {
                 String day = days.get(i);
 
-                RESTUtils.updateDailySchedule(new Callback<ResponseBody>() {
-                                                  @Override
-                                                  public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                                      if (response.isSuccessful()) {
-                                                          updateSuccessfulToast();
-                                                      } else {
-                                                          onFailure(call, null);
-                                                      }
-                                                  }
+                RESTUtils.updateDailySchedule(this,
+                        new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                                if (response.isSuccessful()) {
+                                    updateSuccessfulToast();
+                                } else if (response.code() == 403) {
+                                    invalidToken();
+                                } else {
+                                    onFailure(call, new Exception());
+                                }
+                            }
 
-                                                  @Override
-                                                  public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                                      updateFailedToast();
-                                                  }
-                                              },
+                            @Override
+                            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                                updateFailedToast();
+                            }
+                        },
                         month,
                         day,
                         weekScheduleData.getDays().get(day)
@@ -195,13 +211,16 @@ public class ScheduleManager extends AppCompatActivity {
     }
 
     private void updateWeeklySchedule() {
-        switch(updateDaysCount()) {
+
+        switch (updateDaysCount()) {
             case 0:
                 break;
             case 1:
+                deactivateExpandableView();
                 dailyUpdate();
                 break;
             default:
+                deactivateExpandableView();
                 fullWeekUpdate();
                 break;
         }
@@ -214,7 +233,7 @@ public class ScheduleManager extends AppCompatActivity {
     }
 
     private int getCurrentMonth() {
-        return Calendar.getInstance().get(Calendar.MONTH);
+        return LocalDate.now().getMonthOfYear();
     }
 
     private void buildExpandableData(WeekScheduleData weekScheduleData) {
@@ -223,8 +242,14 @@ public class ScheduleManager extends AppCompatActivity {
 
         HashMap<String, DayScheduleData> daysMap = weekScheduleData.getDays();
 
-        for(String day : days) {
-            quarters.put(day, getQuartersForDay(daysMap.get(day)));
+        String[] weekdays = getResources().getStringArray(R.array.days_array);
+        String[] locWeekdays = getResources().getStringArray(R.array.days_array);
+
+        // DateTimeConstants.MONDAY;
+
+        for (int i = 0; i< weekdays.length; i++) {
+            String day = weekdays[i];
+            quarters.put(locWeekdays[i], getQuartersForDay(daysMap.get(day)));
         }
 
         activateExpandableView();
@@ -233,12 +258,18 @@ public class ScheduleManager extends AppCompatActivity {
     private void activateExpandableView() {
         ScheduleExpandableListView expListView = findViewById(R.id.weekScheduleContent).findViewById(R.id.weekExpand);
         expListView.setActive(true);
+
+        ProgressBar scheduleProgressBar = findViewById(R.id.scheduleProgressBar);
+        scheduleProgressBar.setVisibility(View.INVISIBLE);
     }
 
     private void deactivateExpandableView() {
         ScheduleExpandableListView expListView = findViewById(R.id.weekScheduleContent).findViewById(R.id.weekExpand);
         expListView.collapseAll();
         expListView.setActive(false);
+
+        ProgressBar scheduleProgressBar = findViewById(R.id.scheduleProgressBar);
+        scheduleProgressBar.setVisibility(View.VISIBLE);
     }
 
     private List<QuarterData> getQuartersForDay(DayScheduleData dayData) {
@@ -246,9 +277,9 @@ public class ScheduleManager extends AppCompatActivity {
         HashMap<String, HourScheduleData> hourMap = dayData.getHours();
         List<QuarterData> aQuarterList = new ArrayList<>();
 
-        for(int hour = 0; hour < hourMap.size(); hour++) {
+        for (int hour = 0; hour < hourMap.size(); hour++) {
             quarterMap = hourMap.get(String.valueOf(hour)).getQuarters();
-            for(int quarter = 0; quarter < quarterMap.size(); quarter++) {
+            for (int quarter = 0; quarter < quarterMap.size(); quarter++) {
                 QuarterScheduleData quarterData = quarterMap.get(String.valueOf(quarter));
                 QuarterData aQuarter = new QuarterData();
                 aQuarter.setHour(hour);
@@ -273,27 +304,37 @@ public class ScheduleManager extends AppCompatActivity {
         deactivateExpandableView();
         resetUpdateTracker();
 
-        RESTUtils.getWeeklySchedule(new Callback<WeekScheduleData>() {
-            @Override
-            public void onResponse(Call<WeekScheduleData> call, Response<WeekScheduleData> response) {
-                if(response.isSuccessful()) {
-                    buildExpandableData(response.body());
-                } else {
-                    onFailure(call, null);
-                }
-            }
+        RESTUtils.getWeeklySchedule(this,
+                new Callback<WeekScheduleData>() {
+                    @Override
+                    public void onResponse(@NonNull Call<WeekScheduleData> call, @NonNull Response<WeekScheduleData> response) {
+                        if (response.isSuccessful()) {
+                            buildExpandableData(response.body());
 
-            @Override
-            public void onFailure(Call<WeekScheduleData> call, Throwable t) {
-                failedToGetData();
-            }
-        }, month);
+                        } else if(isTokenError(response.code())) {
+                            invalidToken();
+                        } else {
+                            onFailure(call, new Exception());
+                        }
+
+                        ProgressBar scheduleProgressBar = findViewById(R.id.scheduleProgressBar);
+                        scheduleProgressBar.setVisibility(View.INVISIBLE);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<WeekScheduleData> call, @NonNull Throwable t) {
+                        failedToGetData();
+
+                        ProgressBar scheduleProgressBar = findViewById(R.id.scheduleProgressBar);
+                        scheduleProgressBar.setVisibility(View.INVISIBLE);
+                    }
+                }, month);
 
 
     }
 
     private void resetUpdateTracker() {
-        for(int i = 0; i < daysUpdateTracker.size(); i++) {
+        for (int i = 0; i < daysUpdateTracker.size(); i++) {
             daysUpdateTracker.set(i, Boolean.FALSE);
         }
     }

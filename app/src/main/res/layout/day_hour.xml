@@ -5,7 +5,7 @@
 
     <TextView
         android:id="@+id/dayHour"
-        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+        android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

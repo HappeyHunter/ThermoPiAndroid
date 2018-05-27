@@ -1,30 +1,37 @@
-package com.happeyhunter.thermopi;
+package com.happeyhunter.thermopi.activities;
 
 import android.content.Intent;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.LocaleList;
+import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.happeyhunter.thermopi.R;
 import com.happeyhunter.thermopi.data.thermopi.BoostData;
 import com.happeyhunter.thermopi.data.thermopi.CurrentStatusData;
-import com.happeyhunter.thermopi.data.thermopi.CurrentTemperatureData;
-import com.happeyhunter.thermopi.data.thermopi.TargetTemperatureData;
 import com.happeyhunter.thermopi.rest.RESTUtils;
-import com.happeyhunter.thermopi.utils.FormatHelper;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainMenu extends AppCompatActivity {
+public class MainMenu extends ThermoPiActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +39,6 @@ public class MainMenu extends AppCompatActivity {
         setContentView(R.layout.activity_main_menu);
 
         addListeners();
-
-        updateCurrentStatus();
     }
 
     private void addListeners() {
@@ -87,20 +92,36 @@ public class MainMenu extends AppCompatActivity {
         });
 
         // Holiday Listener
+        View holidayButton = mainMenuInclude.findViewById(R.id.holidayButton);
+
+        holidayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToHolidayManager();
+            }
+        });
 
         // Settings Listener
+        View settingsButton = mainMenuInclude.findViewById(R.id.settingsButton);
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToSettings();
+            }
+        });
     }
 
+
     private void updateCurrentStatus() {
-        RESTUtils.getCurrentStatus(new Callback<CurrentStatusData>() {
+        RESTUtils.getCurrentStatus(this,
+                new Callback<CurrentStatusData>() {
             @Override
-            public void onResponse(Call<CurrentStatusData> call, Response<CurrentStatusData> response) {
+            public void onResponse(@NonNull Call<CurrentStatusData> call, @NonNull Response<CurrentStatusData> response) {
                 if(response.isSuccessful()) {
 
-                    CurrentStatusData status = response.body();
-
-                    // Heating status
                     ImageView heatingStatusView = findViewById(R.id.activeImage);
+                    CurrentStatusData status = response.body();
 
                     if (status.getHeatingEnabled()) {
                         heatingStatusView.setImageResource(R.mipmap.flame_on);
@@ -122,67 +143,77 @@ public class MainMenu extends AppCompatActivity {
 
                     // Current Temperature
                     TextView currentTempView = findViewById(R.id.currentTempView);
-                    currentTempView.setText(FormatHelper.formatTemperature(getApplicationContext(), status.getCurrentTemperature()));
+                    currentTempView.setText(getString(R.string.formattedTemperature, status.getCurrentTemperature()));
 
                     // Target Temperature
                     TextView targetTempView = findViewById(R.id.targetTempView);
-                    targetTempView.setText(FormatHelper.formatTemperature(getApplicationContext(), status.getTargetTemperature()));
-
-                    SwipeRefreshLayout swipeLayout = findViewById(R.id.swiperefresh);
-                    swipeLayout.setRefreshing(false);
-
+                    targetTempView.setText(getString(R.string.formattedTemperature, status.getTargetTemperature()));
+                } else if(isTokenError(response.code())) {
+                    invalidToken();
                 } else {
-                    onFailure(call, null);
+                    onFailure(call, new Exception());
                 }
+
+                SwipeRefreshLayout swipeLayout = findViewById(R.id.swiperefresh);
+                swipeLayout.setRefreshing(false);
+
+                ProgressBar scheduleProgressBar = findViewById(R.id.mainMenuProgressBar);
+                scheduleProgressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
-            public void onFailure(Call<CurrentStatusData> call, Throwable t) {
+            public void onFailure(@NonNull Call<CurrentStatusData> call, @NonNull Throwable t) {
                 // Don't actually do anything, or maybe reset, notification???
                 failedToGetData();
+
+                ProgressBar scheduleProgressBar = findViewById(R.id.mainMenuProgressBar);
+                scheduleProgressBar.setVisibility(View.INVISIBLE);
             }
         });
     }
 
     private void failedToGetData() {
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.failedToRetrieveData), duration);
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.failedToRetrieveData), Toast.LENGTH_SHORT);
         toast.show();
 
         SwipeRefreshLayout swipeLayout = findViewById(R.id.swiperefresh);
         swipeLayout.setRefreshing(false);
     }
 
-    private void updateBoostSetting(View aView) {
+    public void updateBoostSetting(View aView) {
         BoostData update = new BoostData();
         ToggleButton boostButton = (ToggleButton) aView;
 
         update.setEnabled(boostButton.isChecked());
 
-        RESTUtils.updateBoostSetting(new Callback<BoostData>() {
+        RESTUtils.updateBoostSetting(this,
+                new Callback<BoostData>() {
 
             @Override
-            public void onResponse(Call<BoostData> call, Response<BoostData> response) {
+            public void onResponse(@NonNull Call<BoostData> call, @NonNull Response<BoostData> response) {
                 if(response.isSuccessful()) {
                     ImageView boostStatusView = findViewById(R.id.boostImage);
 
-                    if (response.body().getEnabled()) {
+                    BoostData boostStatus = response.body();
+
+                    if (boostStatus.getEnabled()) {
                         boostStatusView.setImageResource(R.mipmap.boost_on);
-                        boostEnabledToast(response.body().getEndDate());
+                        boostEnabledToast(boostStatus.getEndDate());
                     } else {
                         boostStatusView.setImageResource(R.mipmap.boost_off);
                         boostDisabledToast();
                     }
 
                     // Notification for 1 hour or maybe until X or disabled
+                } else if(isTokenError(response.code())) {
+                    invalidToken();
                 } else {
-                    onFailure(call, null);
+                    onFailure(call, new Exception());
                 }
             }
 
             @Override
-            public void onFailure(Call<BoostData> call, Throwable t) {
+            public void onFailure(@NonNull Call<BoostData> call, @NonNull Throwable t) {
                 ToggleButton boostButton = findViewById(R.id.boostButton);
                 boostButton.toggle();
                 // maybe a message or something
@@ -192,26 +223,19 @@ public class MainMenu extends AppCompatActivity {
     }
 
     private void boostUpdateFailedToast() {
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.failedToUpdateData), duration);
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.failedToUpdateData), Toast.LENGTH_SHORT);
         toast.show();
     }
 
     private void boostDisabledToast() {
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.boostDisabled), duration);
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.boostDisabled), Toast.LENGTH_SHORT);
         toast.show();
     }
 
-    private void boostEnabledToast(Long endDate) {
-        int duration = Toast.LENGTH_SHORT;
+    private void boostEnabledToast(DateTime endDate) {
+        String timeString = DateTimeFormat.shortTime().withZone(DateTimeZone.getDefault()).print(endDate);
 
-        Date boostEndData = new Date(endDate*1000);
-        String timeString = DateFormat.getTimeInstance(DateFormat.SHORT, getResources().getConfiguration().locale).format(boostEndData);
-
-        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.boostEnabled, timeString), duration);
+        Toast toast = Toast.makeText(getApplicationContext(), getString(R.string.boostEnabled, timeString), Toast.LENGTH_SHORT);
         toast.show();
     }
 
@@ -225,8 +249,21 @@ public class MainMenu extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void goToHolidayManager() {
+        Intent intent = new Intent(this, HolidayManager.class);
+        startActivity(intent);
+    }
+
+    private void goToSettings() {
+        Intent intent = new Intent(this, Settings.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onResume() {
+        ProgressBar scheduleProgressBar = findViewById(R.id.mainMenuProgressBar);
+        scheduleProgressBar.setVisibility(View.VISIBLE);
+
         updateCurrentStatus();
         super.onResume();
     }
